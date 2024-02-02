@@ -100,8 +100,49 @@ const detalharUsuario = async (req, res) => {
   }
 };
 
+const atualizarUsuario = async (req, res) => {
+  const { nome, email, senha } = req.body;
+  const { id } = req.usuario;
+
+  if (!nome) {
+    return res.status(400).json({ mensagem: "Preencha o campo nome." });
+  }
+  if (!email) {
+    return res.status(400).json({ mensagem: "Preencha o campo email." });
+  }
+  if (!senha) {
+    return res.status(400).json({ mensagem: "Preencha o campo senha." });
+  }
+
+  try {
+    const { rowCount } = await pool.query(
+      "select * from usuarios where email = $1",
+      [email]
+    );
+
+    if (rowCount === 1) {
+      return res.status(400).json({
+        mensagem:
+          "O e-mail informado já está sendo utilizado por outro usuário.",
+      });
+    }
+
+    const senhaCriptografada = await bcrypt.hash(senha, 10);
+
+    const usuarioAtualizado = await pool.query(
+      "update usuarios set nome = $1, email = $2, senha = $3",
+      [nome, email, senhaCriptografada]
+    );
+
+    return res.status(204).json();
+  } catch (error) {
+    return res.status(500).json({ mensagem: "Erro interno do servidor." });
+  }
+};
+
 module.exports = {
   cadastrarUsuario,
   loginUsuario,
   detalharUsuario,
+  atualizarUsuario,
 };
