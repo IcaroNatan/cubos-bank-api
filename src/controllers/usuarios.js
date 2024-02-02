@@ -87,7 +87,21 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+const detalharUsuario = async (req, res) => {
+  const { senha: _, ...usuarioLogado } = req.usuario;
+
+  try {
+    return res.status(200).json(usuarioLogado);
+  } catch (error) {
+    return res.status(401).json({
+      mensagem:
+        "Para acessar este recurso um token de autenticação válido deve ser enviado.",
+    });
+  }
+};
+
 module.exports = {
   cadastrarUsuario,
   loginUsuario,
+  detalharUsuario,
 };
