@@ -19,6 +19,7 @@ rotas.put("/usuario", usuario.atualizarUsuario);
 rotas.get("/categorias", listarCategorias);
 
 rotas.get("/transacao", transacoes.transacoesUsuarioLogado);
+rotas.get("/transacao/extrato", transacoes.obterExtratoTransacoes);
 rotas.get("/transacao/:id", transacoes.detalharTransacaoUsuarioLogado);
 rotas.post("/transacao", transacoes.cadastrarTransacaoUsuarioLogado);
 rotas.put("/transacao/:id", transacoes.atualizarTransacaoUsuarioLogado);

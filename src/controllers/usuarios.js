@@ -2,19 +2,18 @@ const pool = require("../config/conexao");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const senhaJwt = require("../config/senhaJwt");
+const {
+  validaNome,
+  validaEmail,
+  validaSenha,
+} = require("../middlewares/validacaoUsuario");
 
 const cadastrarUsuario = async (req, res) => {
   const { nome, email, senha } = req.body;
 
-  if (!nome) {
-    return res.status(400).json({ mensagem: "Preencha o campo nome." });
-  }
-  if (!email) {
-    return res.status(400).json({ mensagem: "Preencha o campo email." });
-  }
-  if (!senha) {
-    return res.status(400).json({ mensagem: "Preencha o campo senha." });
-  }
+  validaNome(nome, res);
+  validaEmail(email, res);
+  validaSenha(senha, res);
 
   try {
     const { rowCount } = await pool.query(
@@ -44,12 +43,8 @@ const cadastrarUsuario = async (req, res) => {
 const loginUsuario = async (req, res) => {
   const { email, senha } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ mensagem: "Preencha o campo email." });
-  }
-  if (!senha) {
-    return res.status(400).json({ mensagem: "Preencha o campo senha." });
-  }
+  validaEmail(email, res);
+  validaSenha(senha, res);
 
   try {
     const { rows, rowCount } = await pool.query(
@@ -104,15 +99,9 @@ const atualizarUsuario = async (req, res) => {
   const { nome, email, senha } = req.body;
   const { id } = req.usuario;
 
-  if (!nome) {
-    return res.status(400).json({ mensagem: "Preencha o campo nome." });
-  }
-  if (!email) {
-    return res.status(400).json({ mensagem: "Preencha o campo email." });
-  }
-  if (!senha) {
-    return res.status(400).json({ mensagem: "Preencha o campo senha." });
-  }
+  validaNome(nome, res);
+  validaEmail(email, res);
+  validaSenha(senha, res);
 
   try {
     const { rowCount } = await pool.query(

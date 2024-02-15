@@ -1,4 +1,13 @@
 const pool = require("../config/conexao");
+const existeCategoria = require("../middlewares/existeCategoria");
+const existeTipo = require("../middlewares/existeTipo");
+const {
+  validaTipo,
+  validaDescricao,
+  validaCategoria,
+  validaData,
+  validaValor,
+} = require("../middlewares/validacaoTransacoes");
 
 const transacoesUsuarioLogado = async (req, res) => {
   const { id } = req.usuario;
@@ -10,6 +19,40 @@ const transacoesUsuarioLogado = async (req, res) => {
     );
 
     return res.status(200).json(rows);
+  } catch (error) {
+    return res.status(500).json({ mensagem: "Erro interno do servidor." });
+  }
+};
+
+const obterExtratoTransacoes = async (req, res) => {
+  const { id } = req.usuario;
+  try {
+    const entrada = await pool.query(
+      "select sum(valor) as soma_entrada from transacoes where tipo = 'entrada' and usuarios_id = $1",
+      [id]
+    );
+
+    let soma_entrada = entrada.rows[0].soma_entrada;
+
+    if (entrada.rowCount < 1) {
+      soma_entrada = 0;
+    }
+
+    const saida = await pool.query(
+      "select sum(valor) as soma_saida from transacoes where tipo ='saida' and usuarios_id = $1",
+      [id]
+    );
+
+    let soma_saida = saida.rows[0].soma_saida;
+
+    if (saida.rowCount < 1) {
+      soma_saida = 0;
+    }
+
+    return res.status(200).json({
+      entrada: soma_entrada,
+      saida: soma_saida,
+    });
   } catch (error) {
     return res.status(500).json({ mensagem: "Erro interno do servidor." });
   }
@@ -42,45 +85,15 @@ const cadastrarTransacaoUsuarioLogado = async (req, res) => {
   const { tipo, descricao, valor, data, categoria_id } = req.body;
   const { id } = req.usuario;
 
-  if (!tipo) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!descricao) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!valor) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!data) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!categoria_id) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
+  validaTipo(tipo, res);
+  validaDescricao(descricao, res);
+  validaValor(valor, res);
+  validaData(data, res);
+  validaCategoria(categoria_id, res);
 
   try {
-    const categorias = await pool.query(
-      "select * from categorias where id = $1",
-      [categoria_id]
-    );
-
-    if (categorias.rowCount < 1) {
-      return res.status(404).json({ mensagem: "Categoria não encontrada." });
-    }
-
-    if (!(tipo === "entrada" || tipo === "saida")) {
-      return res.status(400).json({ mensagem: "Tipo inválido." });
-    }
+    existeCategoria(categoria_id, res);
+    existeTipo(tipo, res);
 
     const { rows } = await pool.query(
       "insert into transacoes (descricao, valor, data, categoria_id, usuarios_id, tipo) values ($1, $2, $3, $4, $5, $6) returning *",
@@ -101,31 +114,11 @@ const atualizarTransacaoUsuarioLogado = async (req, res) => {
     return res.status(400).json({ mensagem: "Preencha o campo id." });
   }
 
-  if (!tipo) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!descricao) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!valor) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!data) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
-  if (!categoria_id) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-  }
+  validaTipo(tipo, res);
+  validaDescricao(descricao, res);
+  validaValor(valor, res);
+  validaData(data, res);
+  validaCategoria(categoria_id, res);
 
   try {
     const transacao = await pool.query(
@@ -138,18 +131,8 @@ const atualizarTransacaoUsuarioLogado = async (req, res) => {
     if (transacao.rows[0].usuarios_id !== req.usuario.id) {
       return res.status(401).json({ mensagem: "Não autorizado." });
     }
-    const categorias = await pool.query(
-      "select * from categorias where id = $1",
-      [categoria_id]
-    );
-
-    if (categorias.rowCount < 1) {
-      return res.status(404).json({ mensagem: "Categoria não encontrada." });
-    }
-
-    if (!(tipo === "entrada" || tipo === "saida")) {
-      return res.status(400).json({ mensagem: "Tipo inválido." });
-    }
+    existeCategoria(categoria_id, res);
+    existeTipo(tipo, res);
 
     const query = await pool.query(
       "update transacoes set tipo = $1, descricao = $2, valor = $3, data = $4, categoria_id = $5 where id = $6",
@@ -193,4 +176,5 @@ module.exports = {
   cadastrarTransacaoUsuarioLogado,
   atualizarTransacaoUsuarioLogado,
   excluirTransacaoUsuarioLogado,
+  obterExtratoTransacoes,
 };
