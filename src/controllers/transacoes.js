@@ -11,15 +11,42 @@ const {
 
 const transacoesUsuarioLogado = async (req, res) => {
   const { id } = req.usuario;
-
+  const { filtro } = req.query;
   try {
-    const { rows, rowCount } = await pool.query(
-      "select * from transacoes where usuarios_id = $1",
-      [id]
-    );
+    if (filtro) {
+      let resultado = [];
+      for (let categoria of filtro) {
+        const { rowCount, rows } = await pool.query(
+          `
+      select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuarios_id, t.categoria_id, c.descricao as categoria_nome 
+      from transacoes t 
+      join categorias c on t.categoria_id = c.id 
+      where t.usuarios_id = $1 and c.descricao = $2
+      `,
+          [id, categoria]
+        );
 
-    return res.status(200).json(rows);
+        if (rowCount > 0) {
+          resultado.push(rows);
+        }
+      }
+      return res.status(200).json(resultado);
+    }
+    if (!filtro) {
+      const { rows, rowCount } = await pool.query(
+        `
+        select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuarios_id, t.categoria_id, c.descricao as categoria_nome 
+        from transacoes t 
+        join categorias c on t.categoria_id = c.id 
+        where t.usuarios_id = $1
+        `,
+        [id]
+      );
+
+      return res.status(200).json(rows);
+    }
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({ mensagem: "Erro interno do servidor." });
   }
 };
@@ -67,7 +94,12 @@ const detalharTransacaoUsuarioLogado = async (req, res) => {
 
   try {
     const { rows, rowCount } = await pool.query(
-      "select * from transacoes where id = $1",
+      `
+      select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuarios_id, t.categoria_id, c.descricao as categoria_nome 
+      from transacoes t 
+      join categorias c on t.categoria_id = c.id 
+      where t.usuarios_id = $1
+      `,
       [id]
     );
 
