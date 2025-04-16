@@ -1,16 +1,17 @@
-![](https://i.imgur.com/xG74tOh.png)
+> **Nota**: Este projeto é uma implementação do ([desafio-m03-dds-t14-dbe-t05](https://github.com/cubos-academy/desafio-m03-dds-t14-dbe-t05)) do Módulo 3 de Backend da Cubos Academy. 
+
+## 🚀 Funcionalidades Implementadas
+- **Autenticação**: JWT com bcrypt  
+- **Transações**: CRUD completo + filtros por categoria  
+- **Extrato**: Soma automática de entradas/saídas  
+- **Segurança**: Middlewares de validação e proteção de rotas
+
+ ## 💻 Tecnologias  
+- **Node.js** + **Express**  
+- **PostgreSQL** (com queries otimizadas)  
+- **JWT** + **Bcrypt** (autenticação)  
 
 # Desafio Módulo 3 - Backend
-
-## Como entregar?
-
-- [ ] Faça o fork desse repositório para o seu GitHub
-- [ ] Clone o seu repositório em sua máquina
-- [ ] Desenvolva seu projeto, fazendo commits a cada alteração e push
-- [ ] Crie um PR (pull request)
-- [ ] Envie o link do pull request que você criou na plataforma da Cubos
-
-### ⚠️ Importante: Se o pull request não for criado e enviado na plataforma o feedback não será fornecido e constará como não entregue
 
 ## Descrição do desafio
 
