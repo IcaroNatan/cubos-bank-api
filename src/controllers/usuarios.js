@@ -18,7 +18,7 @@ const cadastrarUsuario = async (req, res) => {
   try {
     const { rowCount } = await pool.query(
       "select * from usuarios where email = $1",
-      [email]
+      [email],
     );
 
     if (rowCount === 1) {
@@ -31,7 +31,7 @@ const cadastrarUsuario = async (req, res) => {
 
     const { rows } = await pool.query(
       "insert into usuarios (nome, email, senha) values ($1, $2,$3) returning id, nome, email",
-      [nome, email, senhaCriptografada]
+      [nome, email, senhaCriptografada],
     );
 
     return res.status(201).json(rows[0]);
@@ -49,7 +49,7 @@ const loginUsuario = async (req, res) => {
   try {
     const { rows, rowCount } = await pool.query(
       "select * from usuarios where email = $1",
-      [email]
+      [email],
     );
 
     if (rowCount < 1) {
@@ -106,7 +106,7 @@ const atualizarUsuario = async (req, res) => {
   try {
     const { rowCount } = await pool.query(
       "select * from usuarios where email = $1",
-      [email]
+      [email],
     );
 
     if (rowCount === 1) {
@@ -119,8 +119,8 @@ const atualizarUsuario = async (req, res) => {
     const senhaCriptografada = await bcrypt.hash(senha, 10);
 
     const usuarioAtualizado = await pool.query(
-      "update usuarios set nome = $1, email = $2, senha = $3",
-      [nome, email, senhaCriptografada]
+      "update usuarios set nome = $1, email = $2, senha = $3 where = $4",
+      [nome, email, senhaCriptografada, id],
     );
 
     return res.status(204).json();
