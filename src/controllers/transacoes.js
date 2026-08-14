@@ -98,7 +98,7 @@ const detalharTransacaoUsuarioLogado = async (req, res) => {
       select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuarios_id, t.categoria_id, c.descricao as categoria_nome 
       from transacoes t 
       join categorias c on t.categoria_id = c.id 
-      where t = $1 t.usuarios_id = $2
+      where t.id = $1 t.usuarios_id = $2
       `,
       [id, req.usuario.id],
     );

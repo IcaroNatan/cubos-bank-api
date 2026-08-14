@@ -105,8 +105,8 @@ const atualizarUsuario = async (req, res) => {
 
   try {
     const { rowCount } = await pool.query(
-      "select * from usuarios where email = $1",
-      [email],
+      "select * from usuarios where email = $1 and id != $2",
+      [email, id],
     );
 
     if (rowCount === 1) {
@@ -119,7 +119,7 @@ const atualizarUsuario = async (req, res) => {
     const senhaCriptografada = await bcrypt.hash(senha, 10);
 
     const usuarioAtualizado = await pool.query(
-      "update usuarios set nome = $1, email = $2, senha = $3 where = $4",
+      "update usuarios set nome = $1, email = $2, senha = $3 where id = $4",
       [nome, email, senhaCriptografada, id],
     );
 
